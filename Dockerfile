@@ -69,20 +69,20 @@ WORKDIR /app
 ADD . /app
 
 RUN npm install
-RUN cd /app && npm run build
-RUN ln -sf /usr/local/openresty/nginx/html /app/html
-RUN cp -aRv /app/dist/* /app/html
+#RUN cd /app && npm run build
+#RUN ln -sf /usr/local/openresty/nginx/html /app/html
+#RUN cp -aRv /app/dist/* /app/html
 
 EXPOSE 80 443
 
-ADD nginx/nginx.conf /etc/nginx/nginx.conf
-ADD nginx/default.conf /etc/nginx/conf.d/default.conf
+#ADD nginx/nginx.conf /etc/nginx/nginx.conf
+#ADD nginx/default.conf /etc/nginx/conf.d/default.conf
 
 # Expose volumes.
-VOLUME ["/etc/nginx"]
+#VOLUME ["/etc/nginx"]
 
 # Set the entrypoint script.
 #ENTRYPOINT ["./entrypoint"]
 
 # Define the default command.
-CMD ["nginx", "-c", "/etc/nginx/nginx.conf"]
+#CMD ["nginx", "-c", "/etc/nginx/nginx.conf"]
