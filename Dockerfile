@@ -68,6 +68,8 @@ WORKDIR /app
 # Add files to the container.
 ADD . /app
 
+RUN npm cache clean
+
 RUN npm install
 #RUN cd /app && npm run build
 #RUN ln -sf /usr/local/openresty/nginx/html /app/html
