@@ -85,6 +85,7 @@ def dockertag(label_old, label_new) {
     sh "docker -H tcp://10.1.10.210:5001 tag -f registry.1for.one:5000/${label_old} registry.1for.one:5000/${label_new}"
 }
 
-def dockerpush(vm) {
-    sh "docker -H tcp://10.1.10.210:5001 push ${vm}"
+def dockerpush(image) {
+    sh "docker -H tcp://10.1.10.210:5001 push registry.1for.one:5000/${image}"
 }
+
