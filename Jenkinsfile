@@ -67,7 +67,7 @@ switch ( env.BRANCH_NAME ) {
 
 // Docker functions
 def dockerlogin() {
-    sh "docker -H tcp://10.1.10.210:5001 login -e ${env.DOCKER_EMAIL} -u ${env.DOCKER_USER} -p ${env.DOCKER_PASSWD} registry.1for.one"
+    sh "docker -H tcp://10.1.10.210:5001 login -e ${env.DOCKER_EMAIL} -u ${env.DOCKER_USER} -p ${env.DOCKER_PASSWD} registry.1for.one:5000"
 }
 
 def dockerbuild(label) {
