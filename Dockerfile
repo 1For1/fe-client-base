@@ -10,7 +10,7 @@ FROM alpine:latest
 
 FROM debian:jessie
 
-MAINTAINER 1For1 "ops@1for.one"
+MAINTAINER JobSonic "ops@1jobsonic.com"
 
 ENV OPENRESTY_VERSION=1.9.7.2 \
   DEBIAN_FRONTEND=noninteractive \
