@@ -19,14 +19,14 @@ node ('docker-cmd'){
     sh "echo Working on BRANCH ${env.BRANCH_NAME} for ${env.BUILD_NUMBER}"
 
     dockerlogin()
-    dockerbuild("oneforone/fe-client-base:${env.BRANCH_NAME}.${env.BUILD_NUMBER}")
+    dockerbuild("oneforone/web-app-base:${env.BRANCH_NAME}.${env.BUILD_NUMBER}")
 }
 
 stage 'DockerHub'
 slackSend color: 'green', message: "ORG: ${env.JOB_NAME} #${env.BUILD_NUMBER} - Pushing to Docker"
 node('docker-cmd') {
     dockerlogin()
-    dockerpush("oneforone/fe-client-base:${env.BRANCH_NAME}.${env.BUILD_NUMBER}")
+    dockerpush("oneforone/web-app-base:${env.BRANCH_NAME}.${env.BUILD_NUMBER}")
 
 }
 
@@ -39,14 +39,14 @@ switch ( env.BRANCH_NAME ) {
             dockerlogin()
 
             // Erase
-            dockerrmi('oneforone/fe-client-base:latest')
+            dockerrmi('oneforone/web-app-base:latest')
 
             // Tag
-            dockertag("oneforone/fe-client-base:${env.BRANCH_NAME}.${env.BUILD_NUMBER}","oneforone/fe-client-base:latest")
+            dockertag("oneforone/web-app-base:${env.BRANCH_NAME}.${env.BUILD_NUMBER}","oneforone/web-app-base:latest")
 
             // Push
             slackSend color: 'blue', message: "ORG: ${env.JOB_NAME} #${env.BUILD_NUMBER} - Pushing :latest"
-            dockerpush('oneforone/fe-client-base:latest')
+            dockerpush('oneforone/web-app-base:latest')
 
             //docker -H tcp://10.1.10.210:5001 pull oneforone/backend:latest
         }
@@ -58,7 +58,7 @@ switch ( env.BRANCH_NAME ) {
         slackSend color: 'blue', message: "ORG: ${env.JOB_NAME} #${env.BUILD_NUMBER} - Building Downstream"
 
         try {
-            build '/GitHub-Organization/fe-client/master'
+            build '/GitHub-Organization/web-app/master'
         } catch (err) {
 
         }
