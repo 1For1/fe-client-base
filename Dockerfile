@@ -54,7 +54,7 @@ RUN \
 
 RUN mkdir /app \
     && mkdir -p /etc/nginx/conf.d /var/log/nginx \
-    && curl -sL https://deb.nodesource.com/setup_5.x | bash -
+    && curl -sL https://deb.nodesource.com/setup_6.x | bash -
 
 RUN apt-get install -y nodejs vim \
     && npm install -g npm \
