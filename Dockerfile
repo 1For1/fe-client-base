@@ -8,16 +8,17 @@ FROM alpine:latest
 # http://github.com/tenstartups/openresty-docker
 #
 
-FROM debian:jessie
+FROM ubuntu:xenial
 
 MAINTAINER JobSonic "ops@1jobsonic.com"
 
-ENV OPENRESTY_VERSION=1.9.7.2 \
+ENV OPENRESTY_VERSION=1.9.15.1 \
   DEBIAN_FRONTEND=noninteractive \
   TERM=xterm-color \
   npm_lifecycle_event=build \
   NODE_HOST=localhost \
-  NODE_PORT=3000
+  NODE_PORT=3000 \
+  DEBCONF_NONINTERACTIVE_SEEN=true
 
 # Install packages.
 RUN apt-get update && apt-get -y install \
@@ -30,7 +31,26 @@ RUN apt-get update && apt-get -y install \
   nano \
   perl \
   wget \
-  git
+  git \
+  software-properties-common wget && \
+  add-apt-repository -y ppa:mozillateam/firefox-next
+#  add-apt-repository -y ppa:fkrull/deadsnakes-python2.7 \
+
+RUN wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add -
+RUN echo "deb http://dl.google.com/linux/chrome/deb/ stable main" > /etc/apt/sources.list.d/google.list
+RUN apt-get update -y
+RUN apt-get install -y -q \
+  firefox \
+  google-chrome-beta \
+  openjdk-8-jre-headless \
+  x11vnc \
+  xvfb \
+  xfonts-100dpi \
+  xfonts-75dpi \
+  xfonts-scalable \
+  xfonts-cyrillic \
+  python
+
 
 # Compile openresty from source.
 RUN \
@@ -49,7 +69,11 @@ RUN \
   ln -s /usr/local/openresty/nginx/sbin/nginx /usr/local/bin/nginx && \
   rm -f /usr/sbin/nginx && \
   ln -s /usr/local/openresty/nginx/sbin/nginx /usr/sbin/nginx && \
-  ldconfig
+  ldconfig && \
+  useradd -d /home/seleuser -m seleuser && \
+  mkdir -p /home/seleuser/chrome && \
+  chown -R seleuser /home/seleuser && \
+  chgrp -R seleuser /home/seleuser
 
 
 RUN mkdir /app \
@@ -67,6 +91,7 @@ WORKDIR /app
 
 # Add files to the container.
 ADD . /app
+ADD ./scripts/ /home/root/scripts
 
 RUN npm cache clean
 
@@ -75,7 +100,7 @@ RUN npm install
 #RUN ln -sf /usr/local/openresty/nginx/html /app/html
 #RUN cp -aRv /app/dist/* /app/html
 
-EXPOSE 80 443
+EXPOSE 80 443 4444 5999
 
 #ADD nginx/nginx.conf /etc/nginx/nginx.conf
 #ADD nginx/default.conf /etc/nginx/conf.d/default.conf
@@ -88,3 +113,5 @@ EXPOSE 80 443
 
 # Define the default command.
 #CMD ["nginx", "-c", "/etc/nginx/nginx.conf"]
+
+#ENTRYPOINT ["sh", "/home/root/scripts/start.sh"]
