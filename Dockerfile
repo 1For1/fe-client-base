@@ -81,7 +81,7 @@ RUN mkdir /app \
 RUN apt-get install -y vim \
     && npm install -g webpack \
     && npm install -g typings \
-    && npm install -g webdriver-manager protractor \
+    && npm install -g protractor \
     && npm rebuild node-sass
 
 # Set the working directory.
@@ -98,7 +98,7 @@ RUN cd $(npm root -g)/npm \
     && npm install fs-extra \
     && sed -i -e s/graceful-fs/fs-extra/ -e s/fs.rename/fs.move/ ./lib/utils/rename.js
 
-RUN npm install \
-    && npm run webdriver-manager update
+RUN npm install
+RUN npm run webdriver-manager update
 
 #RUN npm install && npm install --only=dev
