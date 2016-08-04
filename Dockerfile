@@ -1,5 +1,3 @@
-FROM alpine:latest
-
 #
 # Openresty docker image
 #
@@ -8,17 +6,20 @@ FROM alpine:latest
 # http://github.com/tenstartups/openresty-docker
 #
 
-FROM ubuntu:xenial
-
+FROM node:6.3
 MAINTAINER JobSonic "ops@1jobsonic.com"
+EXPOSE 80 443 4444 5999 3000
 
-ENV OPENRESTY_VERSION=1.9.15.1 \
+ENV OPENRESTY_VERSION=1.9.7.2 \
   DEBIAN_FRONTEND=noninteractive \
   TERM=xterm-color \
   npm_lifecycle_event=build \
   NODE_HOST=localhost \
   NODE_PORT=3000 \
-  DEBCONF_NONINTERACTIVE_SEEN=true
+  DEBCONF_NONINTERACTIVE_SEEN=true \
+  PYTHONIOENCODING=utf8 \
+  LANG=en_US.UTF-8
+
 
 # Install packages.
 RUN apt-get update && apt-get -y install \
@@ -32,25 +33,23 @@ RUN apt-get update && apt-get -y install \
   perl \
   wget \
   git \
-  software-properties-common wget && \
-  add-apt-repository -y ppa:mozillateam/firefox-next
-#  add-apt-repository -y ppa:fkrull/deadsnakes-python2.7 \
+  software-properties-common wget
+
 
 RUN wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add -
 RUN echo "deb http://dl.google.com/linux/chrome/deb/ stable main" > /etc/apt/sources.list.d/google.list
 RUN apt-get update -y
 RUN apt-get install -y -q \
-  firefox \
   google-chrome-beta \
-  openjdk-8-jre-headless \
+  openjdk-7-jre-headless \
   x11vnc \
   xvfb \
   xfonts-100dpi \
   xfonts-75dpi \
   xfonts-scalable \
   xfonts-cyrillic \
-  python
-
+  python python-pip && \
+  pip install honcho
 
 # Compile openresty from source.
 RUN \
@@ -77,13 +76,12 @@ RUN \
 
 
 RUN mkdir /app \
-    && mkdir -p /etc/nginx/conf.d /var/log/nginx \
-    && curl -sL https://deb.nodesource.com/setup_6.x | bash -
+    && mkdir -p /etc/nginx/conf.d /var/log/nginx
 
-RUN apt-get install -y nodejs vim \
-    && npm install -g npm \
+RUN apt-get install -y vim \
     && npm install -g webpack \
     && npm install -g typings \
+    && npm install -g webdriver-manager protractor \
     && npm rebuild node-sass
 
 # Set the working directory.
@@ -94,24 +92,13 @@ ADD . /app
 ADD ./scripts/ /home/root/scripts
 
 RUN npm cache clean
+RUN ln -sf /usr/local/openresty/nginx/html /app/html
 
-RUN npm install
-#RUN cd /app && npm run build
-#RUN ln -sf /usr/local/openresty/nginx/html /app/html
-#RUN cp -aRv /app/dist/* /app/html
+RUN cd $(npm root -g)/npm \
+    && npm install fs-extra \
+    && sed -i -e s/graceful-fs/fs-extra/ -e s/fs.rename/fs.move/ ./lib/utils/rename.js
 
-EXPOSE 80 443 4444 5999
+RUN npm install \
+    && npm run webdriver-manager update
 
-#ADD nginx/nginx.conf /etc/nginx/nginx.conf
-#ADD nginx/default.conf /etc/nginx/conf.d/default.conf
-
-# Expose volumes.
-#VOLUME ["/etc/nginx"]
-
-# Set the entrypoint script.
-#ENTRYPOINT ["./entrypoint"]
-
-# Define the default command.
-#CMD ["nginx", "-c", "/etc/nginx/nginx.conf"]
-
-#ENTRYPOINT ["sh", "/home/root/scripts/start.sh"]
+#RUN npm install && npm install --only=dev
